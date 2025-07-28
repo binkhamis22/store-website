@@ -99,7 +99,7 @@ function AdminDashboard() {
       setError('Access denied. Admin privileges required.');
       return;
     }
-    const productId = editingProduct._id || editingProduct.id;
+    const productId = editingProduct.id;
     if (!productId || productId === 'undefined' || productId === 'null') {
       setError('Invalid product ID');
       return;
@@ -150,7 +150,7 @@ function AdminDashboard() {
     console.log('Product ID type:', typeof (product._id || product.id));
     console.log('Full product object:', JSON.stringify(product, null, 2));
     
-    const productId = product._id || product.id;
+    const productId = product.id;
     if (!productId || productId === 'undefined' || productId === 'null') {
       console.error('Invalid product ID detected:', productId);
       setError('Invalid product ID detected. Please refresh the page and try again.');
@@ -158,7 +158,7 @@ function AdminDashboard() {
     }
     
     setEditingProduct({
-      _id: productId,
+      id: productId,
       name: product.name,
       description: product.description,
       price: product.price.toString(),
@@ -617,7 +617,7 @@ function AdminDashboard() {
                 </div>
               ) : (
                 products.map(product => (
-                  <div key={product._id || product.id} className="product-card">
+                  <div key={product.id} className="product-card">
                     <div className="product-image">
                       {product.image ? (
                         <img 
@@ -671,7 +671,7 @@ function AdminDashboard() {
                           ✏️ تعديل
                         </button>
                         <button 
-                          onClick={() => handleDeleteProduct(product._id || product.id)}
+                          onClick={() => handleDeleteProduct(product.id)}
                           className="delete-button"
                         >
                           🗑️ حذف
@@ -700,9 +700,9 @@ function AdminDashboard() {
             ) : (
               <div className="orders-grid">
                 {orders.map(order => (
-                  <div key={order._id || order.id} className="order-card">
+                  <div key={order.id} className="order-card">
                     <div className="order-header">
-                      <h3>طلب #{order._id ? order._id.toString().slice(-6) : order.id}</h3>
+                      <h3>طلب #{order.id}</h3>
                       <span className={`status-badge status-${order.status}`}>
                         {order.status === 'pending' && '⏳ بانتظار الدفع'}
                         {order.status === 'verifying' && '🔍 جاري التحقق من البيانات'}
@@ -735,11 +735,11 @@ function AdminDashboard() {
                     <div className="order-actions">
                       <div className="status-update">
                         <select 
-                          value={selectedStatuses[order._id || order.id] || order.status} 
+                          value={selectedStatuses[order.id] || order.status} 
                           onChange={(e) => {
                             setSelectedStatuses(prev => ({
                               ...prev,
-                              [order._id || order.id]: e.target.value
+                              [order.id]: e.target.value
                             }));
                           }}
                           className="status-select"
@@ -751,8 +751,8 @@ function AdminDashboard() {
                         </select>
                         <button 
                           onClick={() => {
-                            const newStatus = selectedStatuses[order._id || order.id] || order.status;
-                            handleUpdateOrderStatus(order._id || order.id, newStatus);
+                            const newStatus = selectedStatuses[order.id] || order.status;
+                            handleUpdateOrderStatus(order.id, newStatus);
                           }}
                           className="update-button"
                         >
@@ -762,7 +762,7 @@ function AdminDashboard() {
                       
                       {order.status === 'completed' && (
                         <button 
-                          onClick={() => handleDeleteOrder(order._id || order.id)}
+                          onClick={() => handleDeleteOrder(order.id)}
                           className="delete-order-button"
                         >
                           🗑️ حذف الطلب
