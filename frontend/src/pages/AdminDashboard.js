@@ -62,11 +62,10 @@ function AdminDashboard() {
         discount: newProduct.hasDiscount ? parseFloat(newProduct.discount) : 0
       };
       
-      await API.createProduct(productData);
+      const response = await API.createProduct(productData);
       
-      // Refresh products list
-      const res = await API.getProducts();
-      setProducts(res);
+      // Add new product to local state
+      setProducts(prevProducts => [...prevProducts, response]);
       
       // Reset form
       setNewProduct({ name: '', description: '', price: '', image: '', stock: '', discount: '', hasDiscount: false });
@@ -82,9 +81,8 @@ function AdminDashboard() {
       try {
         await API.deleteProduct(productId);
         
-        // Refresh products list
-        const res = await API.getProducts();
-        setProducts(res);
+        // Remove product from local state
+        setProducts(prevProducts => prevProducts.filter(product => product.id !== productId));
         
       } catch (err) {
         setError('فشل في حذف المنتج');
@@ -124,8 +122,13 @@ function AdminDashboard() {
       console.log('User token:', localStorage.getItem('token'));
       const response = await API.updateProduct(productId, productData);
       console.log('Update response:', response);
-      const res = await API.getProducts();
-      setProducts(res);
+      
+      // Update local state directly instead of refetching
+      setProducts(prevProducts => 
+        prevProducts.map(product => 
+          product.id === productId ? response : product
+        )
+      );
       setEditingProduct(null);
       setShowEditForm(false);
     } catch (err) {
@@ -177,9 +180,12 @@ function AdminDashboard() {
       const response = await API.updateOrder(orderId, { status: newStatus });
       console.log('Update response:', response);
       
-      // Refresh orders list
-      const res = await API.getOrders();
-      setOrders(res);
+      // Update local state directly
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderId ? response : order
+        )
+      );
       
     } catch (err) {
       console.error('Error updating order status:', err);
@@ -202,9 +208,8 @@ function AdminDashboard() {
         const response = await API.deleteOrder(orderId);
         console.log('Delete response:', response);
         
-        // Refresh orders list
-        const res = await API.getOrders();
-        setOrders(res);
+        // Remove order from local state
+        setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
         
       } catch (err) {
         console.error('Error deleting order:', err);
