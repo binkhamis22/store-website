@@ -15,12 +15,19 @@ function Login() {
     setError('');
     
     try {
-      const res = await API.post('/auth/login', { email, password });
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      navigate('/'); // Redirect to home page instead of products
+      const res = await API.login({ email, password });
+      
+      // Check if login was successful
+      if (res.token && res.user) {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('user', JSON.stringify(res.user));
+        navigate('/'); // Redirect to home page instead of products
+      } else {
+        setError(res.message || 'Login failed');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -17,10 +17,17 @@ function Register() {
     setError('');
     
     try {
-      await API.post('/auth/register', { name, email, password, phone });
-      navigate('/'); // Redirect to home page instead of login
+      const res = await API.register({ name, email, password, phone });
+      
+      // Check if registration was successful
+      if (res.message === 'User registered successfully') {
+        navigate('/login'); // Redirect to login page
+      } else {
+        setError(res.message || 'Registration failed');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error('Registration error:', err);
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
