@@ -171,6 +171,7 @@ exports.handler = async function(event, context) {
 
     // Create product
     if (actualPath === '/api/products' && httpMethod === 'POST') {
+      console.log('Create product request:', { actualPath, body: parsedBody });
       const { name, description, price, image, stock, discount } = parsedBody;
       const newProduct = {
         id: products.length + 1,
@@ -192,6 +193,7 @@ exports.handler = async function(event, context) {
 
     // Update product
     if (actualPath.startsWith('/api/products/') && httpMethod === 'PUT') {
+      console.log('Update product request:', { actualPath, productId: actualPath.split('/').pop() });
       const productId = parseInt(actualPath.split('/').pop());
       const { name, description, price, image, stock, discount } = parsedBody;
       
@@ -223,6 +225,7 @@ exports.handler = async function(event, context) {
 
     // Delete product
     if (actualPath.startsWith('/api/products/') && httpMethod === 'DELETE') {
+      console.log('Delete product request:', { actualPath, productId: actualPath.split('/').pop() });
       const productId = parseInt(actualPath.split('/').pop());
       
       const productIndex = products.findIndex(p => p.id === productId);
@@ -339,6 +342,7 @@ exports.handler = async function(event, context) {
     }
 
     // Default response
+    console.log('Route not found:', { actualPath, httpMethod, parsedBody });
     return {
       statusCode: 404,
       headers,
@@ -350,8 +354,14 @@ exports.handler = async function(event, context) {
           'POST /api/auth/login',
           'POST /api/auth/register', 
           'GET /api/products',
+          'POST /api/products',
+          'PUT /api/products/{id}',
+          'DELETE /api/products/{id}',
           'GET /api/orders',
-          'POST /api/orders'
+          'GET /api/orders/my?userId={userId}',
+          'POST /api/orders',
+          'PUT /api/orders/{id}',
+          'DELETE /api/orders/{id}'
         ]
       })
     };
