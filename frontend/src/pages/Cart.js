@@ -7,7 +7,7 @@ function Cart() {
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error] = useState('');
+  const [error, setError] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const navigate = useNavigate();
