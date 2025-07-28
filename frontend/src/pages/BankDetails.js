@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../api';
 
@@ -16,6 +16,7 @@ function BankDetails() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
+  const hasLoadedOrders = useRef(false);
 
   // Fetch user orders on component mount
   useEffect(() => {
@@ -38,6 +39,7 @@ function BankDetails() {
         });
         
         setUserOrders(response);
+        hasLoadedOrders.current = true;
       } catch (error) {
         console.error('Error fetching user orders:', error);
         setError('فشل في تحميل الطلبات. الرجاء المحاولة مرة أخرى.');
@@ -46,12 +48,27 @@ function BankDetails() {
       }
     };
 
-    if (user && (user.id || user._id)) {
+    // Only fetch if user exists and we haven't loaded orders yet
+    if (user && (user.id || user._id) && !hasLoadedOrders.current) {
       fetchUserOrders();
-    } else {
+    } else if (!user) {
       setOrdersLoading(false);
     }
-  }, [user]); // Add user dependency
+  }, [user?.id]); // Only depend on user.id, not the entire user object
+
+  // Manual refresh function
+  const refreshOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      const response = await API.getMyOrders(user.id || user._id);
+      setUserOrders(response);
+    } catch (error) {
+      console.error('Error refreshing orders:', error);
+      setError('فشل في تحديث الطلبات. الرجاء المحاولة مرة أخرى.');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,7 +162,29 @@ function BankDetails() {
       )}
 
       <div className="card">
-        <h2>تأكيد الدفع</h2>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '1rem'
+        }}>
+          <h2>تأكيد الدفع</h2>
+          <button 
+            onClick={refreshOrders}
+            disabled={ordersLoading}
+            style={{ 
+              padding: '0.5rem 1rem',
+              fontSize: '0.9rem',
+              borderRadius: '25px',
+              background: ordersLoading ? '#ccc' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+              color: 'white',
+              border: 'none',
+              cursor: ordersLoading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {ordersLoading ? 'جاري التحديث...' : '🔄 تحديث الطلبات'}
+          </button>
+        </div>
         
         {/* First Bank Information */}
         <div style={{
