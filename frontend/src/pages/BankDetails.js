@@ -26,6 +26,17 @@ function BankDetails() {
         const response = await API.getMyOrders(user.id || user._id);
         console.log('Orders response:', response);
         console.log('First order structure:', response[0]);
+        
+        // Debug: Log all orders and their statuses
+        response.forEach((order, index) => {
+          console.log(`Order ${index}:`, {
+            id: order._id || order.id,
+            status: order.status,
+            hasBankDetails: !!order.bankDetails,
+            total: order.total
+          });
+        });
+        
         setUserOrders(response);
       } catch (error) {
         console.error('Error fetching user orders:', error);
@@ -528,7 +539,7 @@ function BankDetails() {
             </label>
             {!ordersLoading && userOrders.length > 0 && (
               <small style={{ color: '#667eea', fontSize: '0.9rem', marginBottom: '0.5rem', display: 'block' }}>
-                متاح {userOrders.filter(order => !order.bankDetails).length} من {userOrders.length} طلب يحتاج تفاصيل البنك
+                متاح {userOrders.filter(order => !order.bankDetails && order.status === 'pending').length} من {userOrders.length} طلب يحتاج تفاصيل البنك
               </small>
             )}
             <select
@@ -540,26 +551,26 @@ function BankDetails() {
               <option value="">اختر رقم الطلب</option>
               {ordersLoading ? (
                 <option value="" disabled>جاري التحميل...</option>
-              ) : userOrders.filter(order => !order.bankDetails).length === 0 ? (
+              ) : userOrders.filter(order => !order.bankDetails && order.status === 'pending').length === 0 ? (
                 <option value="" disabled>لا توجد طلبات تحتاج تفاصيل البنك</option>
               ) : (
                 userOrders
-                  .filter(order => !order.bankDetails) // Only show orders without bank details
+                  .filter(order => !order.bankDetails && order.status === 'pending') // Only show orders without bank details and with pending status
                   .map((order, index) => {
                     console.log(`Order ${index}:`, order);
                     const orderId = order._id || order.id || order.orderId || `order-${index + 1}`;
                     const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : 'تاريخ غير معروف';
                     return (
                       <option key={orderId} value={orderId}>
-                        طلب #{orderId.toString().slice(-6)} - {orderDate}
+                        طلب #{orderId.toString().slice(-6)} - {orderDate} - {order.total} ريال
                       </option>
                     );
                   })
               )}
             </select>
-            {!ordersLoading && userOrders.filter(order => !order.bankDetails).length === 0 && (
+            {!ordersLoading && userOrders.filter(order => !order.bankDetails && order.status === 'pending').length === 0 && (
               <small style={{ color: '#666', fontSize: '0.8rem', marginTop: '0.5rem', display: 'block' }}>
-                جميع طلباتك تم إدخال تفاصيل البنك لها بالفعل. لا توجد طلبات تحتاج تفاصيل البنك.
+                لا توجد طلبات بانتظار الدفع تحتاج تفاصيل البنك. جميع الطلبات إما تم دفعها أو تم إدخال تفاصيل البنك لها.
               </small>
             )}
           </div>
