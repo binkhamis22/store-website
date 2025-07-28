@@ -16,9 +16,10 @@ function Orders() {
           return;
         }
         
-        const res = await API.get(`/orders/my?userId=${user.id || user._id}`);
-        setOrders(res.data);
+        const res = await API.getMyOrders(user.id || user._id);
+        setOrders(res);
       } catch (err) {
+        console.error('Orders loading error:', err);
         setError('فشل في تحميل الطلبات');
       } finally {
         setLoading(false);

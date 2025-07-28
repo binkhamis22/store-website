@@ -68,7 +68,7 @@ function Cart() {
         user: user._id || user.id
       };
 
-      await API.post('/orders', orderData);
+      await API.createOrder(orderData);
       console.log('API call successful');
       
       // Clear cart

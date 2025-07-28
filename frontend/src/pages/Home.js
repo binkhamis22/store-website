@@ -14,8 +14,8 @@ function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await API.get('/products');
-        setProducts(res.data);
+        const res = await API.getProducts();
+        setProducts(res);
       } catch (err) {
         setError('Failed to load products');
       } finally {
