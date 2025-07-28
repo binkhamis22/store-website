@@ -54,7 +54,7 @@ function BankDetails() {
     } else if (!user) {
       setOrdersLoading(false);
     }
-  }, [user?.id]); // Only depend on user.id, not the entire user object
+  }, [user]); // Include user in dependencies to satisfy ESLint
 
   // Manual refresh function
   const refreshOrders = async () => {
