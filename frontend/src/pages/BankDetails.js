@@ -23,10 +23,10 @@ function BankDetails() {
       try {
         setOrdersLoading(true);
         console.log('Fetching user orders...');
-        const response = await API.get(`/orders/my?userId=${user.id || user._id}`);
-        console.log('Orders response:', response.data);
-        console.log('First order structure:', response.data[0]);
-        setUserOrders(response.data);
+        const response = await API.getMyOrders(user.id || user._id);
+        console.log('Orders response:', response);
+        console.log('First order structure:', response[0]);
+        setUserOrders(response);
       } catch (error) {
         console.error('Error fetching user orders:', error);
         setError('فشل في تحميل الطلبات. الرجاء المحاولة مرة أخرى.');
@@ -82,7 +82,7 @@ function BankDetails() {
       console.log('Updating order with bank details and status:', updateData);
       
       // Update the order
-      await API.put(`/orders/${bankDetails.orderNumber}`, updateData);
+      await API.updateOrder(bankDetails.orderNumber, updateData);
       
       setShowSuccessAlert(true);
       setTimeout(() => {
