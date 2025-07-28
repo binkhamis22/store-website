@@ -1,6 +1,6 @@
 // API configuration
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://spontaneous-chebakia-f8495b.netlify.app/.netlify/functions/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/.netlify/functions/api';
 
 const API = {
   // Auth
