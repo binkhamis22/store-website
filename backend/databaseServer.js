@@ -64,6 +64,37 @@ app.get('/api/auth/debug', async (req, res) => {
   }
 });
 
+// Create admin user route
+app.post('/api/auth/create-admin', async (req, res) => {
+  try {
+    const existingAdmin = await dbHelpers.findUserByEmail('admin@store.com');
+    
+    if (existingAdmin) {
+      res.json({ 
+        message: 'Admin user already exists',
+        email: 'admin@store.com',
+        password: 'admin123'
+      });
+    } else {
+      const adminUser = await dbHelpers.createUser({
+        name: 'Admin User',
+        email: 'admin@store.com',
+        password: 'admin123',
+        phone: '123-456-7890'
+      });
+      
+      res.json({ 
+        message: 'Admin user created successfully',
+        email: 'admin@store.com',
+        password: 'admin123'
+      });
+    }
+  } catch (err) {
+    console.error('Error creating admin:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Products routes
 app.get('/api/products', async (req, res) => {
   try {
