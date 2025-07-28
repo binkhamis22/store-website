@@ -83,13 +83,14 @@ exports.handler = async function(event, context) {
         headers,
         body: JSON.stringify({ 
           message: 'API is working!',
-          availableEndpoints: [
-            'POST /api/auth/login',
-            'POST /api/auth/register', 
-            'GET /api/products',
-            'GET /api/orders',
-            'POST /api/orders'
-          ],
+                  availableEndpoints: [
+          'POST /api/auth/login',
+          'POST /api/auth/register', 
+          'GET /api/products',
+          'GET /api/orders',
+          'GET /api/orders/my?userId={userId}',
+          'POST /api/orders'
+        ],
           adminCredentials: {
             email: 'admin@store.com',
             password: 'admin123'
@@ -169,6 +170,27 @@ exports.handler = async function(event, context) {
         statusCode: 200,
         headers,
         body: JSON.stringify(orders)
+      };
+    }
+
+    // Get user's orders
+    if (actualPath.startsWith('/api/orders/my') && httpMethod === 'GET') {
+      const urlParams = new URLSearchParams(event.queryStringParameters || {});
+      const userId = urlParams.get('userId');
+      
+      if (!userId) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ message: 'User ID is required' })
+        };
+      }
+      
+      const userOrders = orders.filter(order => order.userId === parseInt(userId));
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(userOrders)
       };
     }
 
