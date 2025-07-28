@@ -14,6 +14,7 @@ function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
         const res = await API.getProducts();
         setProducts(res);
       } catch (err) {
@@ -37,6 +38,19 @@ function Home() {
     
     fetchProducts();
   }, []);
+
+  // Refresh products function
+  const refreshProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await API.getProducts();
+      setProducts(res);
+    } catch (err) {
+      setError('Failed to refresh products');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Listen for storage changes (login/logout)
   useEffect(() => {
@@ -137,6 +151,24 @@ function Home() {
                 >
                   لوحة الإدارة
                 </button>}
+                <button 
+                  onClick={refreshProducts}
+                  disabled={loading}
+                  style={{ 
+                    margin: '0 0.5rem',
+                    padding: '0.5rem 1rem',
+                    fontSize: '1.1rem',
+                    borderRadius: '25px',
+                    width: '150px',
+                    height: '40px',
+                    background: loading ? '#ccc' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+                    color: 'white',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {loading ? 'جاري التحديث...' : '🔄 تحديث'}
+                </button>
                 <button 
                   onClick={() => navigate('/orders')}
                   style={{ 

@@ -11,6 +11,7 @@ function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
         const res = await API.getProducts();
         setProducts(res);
       } catch (err) {
@@ -22,6 +23,19 @@ function Products() {
     
     fetchProducts();
   }, []);
+
+  // Refresh products function
+  const refreshProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await API.getProducts();
+      setProducts(res);
+    } catch (err) {
+      setError('Failed to refresh products');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -44,7 +58,29 @@ function Products() {
   return (
     <div className="container">
       <div className="card">
-        <h2>Our Products</h2>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '1rem'
+        }}>
+          <h2>Our Products</h2>
+          <button 
+            onClick={refreshProducts}
+            disabled={loading}
+            style={{ 
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
+              borderRadius: '25px',
+              background: loading ? '#ccc' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+              color: 'white',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? 'جاري التحديث...' : '🔄 تحديث المنتجات'}
+          </button>
+        </div>
         {products.length === 0 ? (
           <p style={{ textAlign: 'center', fontSize: '1.2rem' }}>
             No products available yet.
