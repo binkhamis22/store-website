@@ -1,44 +1,41 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const User = require('./models/User');
+const { dbHelpers } = require('./database');
 
-// Direct connection string
-const MONGO_URI = 'mongodb+srv://crazycool2030:ET9QXN930KtaOT5m@cluster0.fxwkbua.mongodb.net/store-website?retryWrites=true&w=majority&appName=Cluster0';
-
-async function createAdmin() {
+async function createAdminUser() {
   try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
+    console.log('🔧 Creating admin user for live deployment...');
     
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ email: 'admin@store.com' });
+    const existingAdmin = await dbHelpers.findUserByEmail('admin@store.com');
+    
     if (existingAdmin) {
-      console.log('Admin user already exists!');
-      console.log('Email: admin@store.com');
-      console.log('Password: admin123');
-      mongoose.connection.close();
-      return;
+      console.log('✅ Admin user already exists:');
+      console.log('   Email:', existingAdmin.email);
+      console.log('   Password: admin123');
+      console.log('   isAdmin:', existingAdmin.isAdmin);
+    } else {
+      console.log('📝 Creating new admin user...');
+      
+      // Create admin user
+      const adminUser = await dbHelpers.createUser({
+        name: 'Admin User',
+        email: 'admin@store.com',
+        password: 'admin123',
+        phone: '123-456-7890'
+      });
+      
+      console.log('✅ Admin user created successfully!');
+      console.log('   Email: admin@store.com');
+      console.log('   Password: admin123');
+      console.log('   User ID:', adminUser.id);
     }
     
-    // Create admin user
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    const adminUser = new User({
-      name: 'Admin User',
-      email: 'admin@store.com',
-      password: hashedPassword,
-      isAdmin: true
-    });
+    console.log('\n🔑 Login Credentials:');
+    console.log('   Email: admin@store.com');
+    console.log('   Password: admin123');
     
-    await adminUser.save();
-    console.log('Admin user created successfully!');
-    console.log('Email: admin@store.com');
-    console.log('Password: admin123');
-    
-    mongoose.connection.close();
-    
-  } catch (error) {
-    console.error('Error creating admin:', error);
+  } catch (err) {
+    console.error('❌ Error creating admin:', err);
   }
 }
 
-createAdmin(); 
+createAdminUser(); 
