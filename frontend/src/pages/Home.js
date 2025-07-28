@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import API from '../api';
 import { getPriceDisplay } from '../utils/priceUtils';
 
 function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -66,6 +67,32 @@ function Home() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // Auto-refresh when page becomes visible (user returns to tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refreshProducts();
+      }
+    };
+
+    const handleFocus = () => {
+      refreshProducts();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  // Auto-refresh when navigating to this page
+  useEffect(() => {
+    refreshProducts();
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -151,24 +178,7 @@ function Home() {
                 >
                   لوحة الإدارة
                 </button>}
-                <button 
-                  onClick={refreshProducts}
-                  disabled={loading}
-                  style={{ 
-                    margin: '0 0.5rem',
-                    padding: '0.5rem 1rem',
-                    fontSize: '1.1rem',
-                    borderRadius: '25px',
-                    width: '150px',
-                    height: '40px',
-                    background: loading ? '#ccc' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-                    color: 'white',
-                    border: 'none',
-                    cursor: loading ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {loading ? 'جاري التحديث...' : '🔄 تحديث'}
-                </button>
+
                 <button 
                   onClick={() => navigate('/orders')}
                   style={{ 

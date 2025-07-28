@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import API from '../api';
 import { getPriceDisplay } from '../utils/priceUtils';
 
 function Products() {
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,6 +38,32 @@ function Products() {
     }
   };
 
+  // Auto-refresh when page becomes visible (user returns to tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refreshProducts();
+      }
+    };
+
+    const handleFocus = () => {
+      refreshProducts();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  // Auto-refresh when navigating to this page
+  useEffect(() => {
+    refreshProducts();
+  }, [location.pathname]);
+
   if (loading) {
     return (
       <div className="container">
@@ -58,29 +85,7 @@ function Products() {
   return (
     <div className="container">
       <div className="card">
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '1rem'
-        }}>
-          <h2>Our Products</h2>
-          <button 
-            onClick={refreshProducts}
-            disabled={loading}
-            style={{ 
-              padding: '0.5rem 1rem',
-              fontSize: '1rem',
-              borderRadius: '25px',
-              background: loading ? '#ccc' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-              color: 'white',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {loading ? 'جاري التحديث...' : '🔄 تحديث المنتجات'}
-          </button>
-        </div>
+        <h2>Our Products</h2>
         {products.length === 0 ? (
           <p style={{ textAlign: 'center', fontSize: '1.2rem' }}>
             No products available yet.
