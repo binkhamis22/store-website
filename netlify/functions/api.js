@@ -1,7 +1,12 @@
 // Simple API function for Netlify Functions
+const fs = require('fs');
+const path = require('path');
 
-// Global data storage (persists between function calls in the same instance)
-let globalData = {
+// Data file path
+const dataFilePath = path.join('/tmp', 'store-data.json');
+
+// Default data structure
+const defaultData = {
   users: [
     {
       id: 1,
@@ -42,6 +47,32 @@ let globalData = {
   ],
   orders: []
 };
+
+// Load data from file
+function loadData() {
+  try {
+    if (fs.existsSync(dataFilePath)) {
+      const data = fs.readFileSync(dataFilePath, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+  }
+  return defaultData;
+}
+
+// Save data to file
+function saveData(data) {
+  try {
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    console.log('Data saved successfully');
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+}
+
+// Load initial data
+let globalData = loadData();
 
 exports.handler = async function(event, context) {
   // Enable CORS
@@ -158,6 +189,7 @@ exports.handler = async function(event, context) {
       
       users.push(newUser);
       globalData.users = users; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 201,
         headers,
@@ -190,6 +222,7 @@ exports.handler = async function(event, context) {
       
       products.push(newProduct);
       globalData.products = products; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 201,
         headers,
@@ -223,6 +256,7 @@ exports.handler = async function(event, context) {
       };
       
       globalData.products = products; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 200,
         headers,
@@ -246,6 +280,7 @@ exports.handler = async function(event, context) {
       
       products.splice(productIndex, 1);
       globalData.products = products; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 200,
         headers,
@@ -296,6 +331,7 @@ exports.handler = async function(event, context) {
       
       orders.push(newOrder);
       globalData.orders = orders; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 201,
         headers,
@@ -306,7 +342,7 @@ exports.handler = async function(event, context) {
     // Update order
     if (actualPath.startsWith('/api/orders/') && httpMethod === 'PUT') {
       const orderId = parseInt(actualPath.split('/').pop());
-      const { status } = parsedBody;
+      const { status, bankDetails } = parsedBody;
       
       const orderIndex = orders.findIndex(o => o.id === orderId);
       if (orderIndex === -1) {
@@ -319,10 +355,12 @@ exports.handler = async function(event, context) {
       
       orders[orderIndex] = {
         ...orders[orderIndex],
-        status
+        ...(status && { status }),
+        ...(bankDetails && { bankDetails })
       };
       
       globalData.orders = orders; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 200,
         headers,
@@ -345,6 +383,7 @@ exports.handler = async function(event, context) {
       
       orders.splice(orderIndex, 1);
       globalData.orders = orders; // Update global data
+      saveData(globalData); // Save to file
       return {
         statusCode: 200,
         headers,
