@@ -8,6 +8,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: '',
     description: '',
@@ -33,24 +34,28 @@ function AdminDashboard() {
       return;
     }
 
-    const fetchData = async () => {
-      try {
-        const [ordersRes, productsRes] = await Promise.all([
-          API.getOrders(),
-          API.getProducts()
-        ]);
-        setOrders(ordersRes);
-        setProducts(productsRes);
-      } catch (err) {
-        console.error('Dashboard data error:', err);
-        setError('Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [user, navigate]); // Include dependencies but handle refetching properly
+    // Only fetch data once when component mounts
+    if (!dataLoaded) {
+      const fetchData = async () => {
+        try {
+          const [ordersRes, productsRes] = await Promise.all([
+            API.getOrders(),
+            API.getProducts()
+          ]);
+          setOrders(ordersRes);
+          setProducts(productsRes);
+          setDataLoaded(true);
+        } catch (err) {
+          console.error('Dashboard data error:', err);
+          setError('Failed to load dashboard data');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchData();
+    }
+  }, [user, navigate, dataLoaded]); // Include dependencies but prevent refetching
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
