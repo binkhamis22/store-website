@@ -50,7 +50,7 @@ function AdminDashboard() {
     };
     
     fetchData();
-  }, []); // Only run once on component mount
+  }, [user, navigate]); // Include dependencies but handle refetching properly
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
