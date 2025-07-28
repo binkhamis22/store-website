@@ -50,7 +50,7 @@ function AdminDashboard() {
     };
     
     fetchData();
-  }, [user, navigate]);
+  }, []); // Only run once on component mount
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
@@ -124,11 +124,14 @@ function AdminDashboard() {
       console.log('Update response:', response);
       
       // Update local state directly instead of refetching
-      setProducts(prevProducts => 
-        prevProducts.map(product => 
-          product.id === productId ? response : product
-        )
-      );
+      setProducts(prevProducts => {
+        console.log('Previous products:', prevProducts);
+        const updatedProducts = prevProducts.map(product => 
+          product.id === parseInt(productId) ? response : product
+        );
+        console.log('Updated products:', updatedProducts);
+        return updatedProducts;
+      });
       setEditingProduct(null);
       setShowEditForm(false);
     } catch (err) {
