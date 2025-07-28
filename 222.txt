@@ -1,0 +1,19 @@
+cd "C:\Users\Bin Khamis\store-website\backend"
+node simpleServer.js
+
+
+
+
+cd "C:\Users\Bin Khamis\store-website\frontend"
+npm start
+
+
+
+
+
+
+cd "C:\Users\Bin Khamis\store-website\backend"
+node databaseServer.js
+
+cd "C:\Users\Bin Khamis\store-website\frontend"
+npm start
