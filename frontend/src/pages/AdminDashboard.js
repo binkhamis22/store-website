@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
+import { getPriceDisplay } from '../utils/priceUtils';
 
 function AdminDashboard() {
   const [orders, setOrders] = useState([]);
@@ -651,30 +652,55 @@ function AdminDashboard() {
                       <p className="product-description">{product.description}</p>
                       <div className="product-meta">
                         <div className="product-price">
-                          <span>{product.price}</span>
-                          <img src="/price-icon.png" alt="price" />
+                          {(() => {
+                            const priceInfo = getPriceDisplay(product);
+                            return (
+                              <>
+                                {priceInfo.hasDiscount ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexDirection: 'column' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                      <span style={{ 
+                                        textDecoration: 'line-through', 
+                                        color: '#999', 
+                                        fontSize: '0.9rem' 
+                                      }}>
+                                        {priceInfo.originalPrice}
+                                      </span>
+                                      <span style={{ 
+                                        color: '#e53e3e', 
+                                        fontWeight: 'bold',
+                                        fontSize: '1.1rem'
+                                      }}>
+                                        {priceInfo.discountedPrice}
+                                      </span>
+                                      <img src="/price-icon.png" alt="price" />
+                                    </div>
+                                    <div style={{
+                                      background: 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)',
+                                      color: 'white',
+                                      padding: '0.3rem 0.8rem',
+                                      borderRadius: '15px',
+                                      fontSize: '0.8rem',
+                                      fontWeight: 'bold'
+                                    }}>
+                                      🎯 خصم {priceInfo.discount}%
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>{priceInfo.originalPrice}</span>
+                                    <img src="/price-icon.png" alt="price" />
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                         <div className="product-stock">
                           <span className={`stock-badge ${product.stock > 10 ? 'in-stock' : product.stock > 0 ? 'low-stock' : 'out-of-stock'}`}>
                             {product.stock > 0 ? `${product.stock} في المخزون` : 'إنتهى المخزون'}
                           </span>
                         </div>
-                        {product.discount > 0 && (
-                          <div style={{
-                            background: 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)',
-                            color: 'white',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '20px',
-                            fontSize: '0.9rem',
-                            fontWeight: 'bold',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            marginTop: '0.5rem'
-                          }}>
-                            🎯 خصم {product.discount}%
-                          </div>
-                        )}
                       </div>
                       <div className="product-actions">
                         <button 
