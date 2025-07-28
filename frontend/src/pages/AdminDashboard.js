@@ -36,12 +36,13 @@ function AdminDashboard() {
     const fetchData = async () => {
       try {
         const [ordersRes, productsRes] = await Promise.all([
-          API.get('/orders'),
-          API.get('/products')
+          API.getOrders(),
+          API.getProducts()
         ]);
-        setOrders(ordersRes.data);
-        setProducts(productsRes.data);
+        setOrders(ordersRes);
+        setProducts(productsRes);
       } catch (err) {
+        console.error('Dashboard data error:', err);
         setError('Failed to load dashboard data');
       } finally {
         setLoading(false);
@@ -61,11 +62,11 @@ function AdminDashboard() {
         discount: newProduct.hasDiscount ? parseFloat(newProduct.discount) : 0
       };
       
-      await API.post('/products', productData);
+      await API.createProduct(productData);
       
       // Refresh products list
-      const res = await API.get('/products');
-      setProducts(res.data);
+      const res = await API.getProducts();
+      setProducts(res);
       
       // Reset form
       setNewProduct({ name: '', description: '', price: '', image: '', stock: '', discount: '', hasDiscount: false });
@@ -79,11 +80,11 @@ function AdminDashboard() {
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
       try {
-        await API.delete(`/products/${productId}`);
+        await API.deleteProduct(productId);
         
         // Refresh products list
-        const res = await API.get('/products');
-        setProducts(res.data);
+        const res = await API.getProducts();
+        setProducts(res);
         
       } catch (err) {
         setError('فشل في حذف المنتج');
@@ -121,10 +122,10 @@ function AdminDashboard() {
       console.log('Updating product:', productId);
       console.log('Product data:', productData);
       console.log('User token:', localStorage.getItem('token'));
-      const response = await API.put(`/products/${productId}`, productData);
-      console.log('Update response:', response.data);
-      const res = await API.get('/products');
-      setProducts(res.data);
+      const response = await API.updateProduct(productId, productData);
+      console.log('Update response:', response);
+      const res = await API.getProducts();
+      setProducts(res);
       setEditingProduct(null);
       setShowEditForm(false);
     } catch (err) {
@@ -173,12 +174,12 @@ function AdminDashboard() {
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       console.log('Updating order status:', orderId, newStatus);
-      const response = await API.put(`/orders/${orderId}/status`, { status: newStatus });
-      console.log('Update response:', response.data);
+      const response = await API.updateOrder(orderId, { status: newStatus });
+      console.log('Update response:', response);
       
       // Refresh orders list
-      const res = await API.get('/orders');
-      setOrders(res.data);
+      const res = await API.getOrders();
+      setOrders(res);
       
     } catch (err) {
       console.error('Error updating order status:', err);
@@ -198,12 +199,12 @@ function AdminDashboard() {
           return;
         }
         
-        const response = await API.delete(`/orders/${orderId}`);
-        console.log('Delete response:', response.data);
+        const response = await API.deleteOrder(orderId);
+        console.log('Delete response:', response);
         
         // Refresh orders list
-        const res = await API.get('/orders');
-        setOrders(res.data);
+        const res = await API.getOrders();
+        setOrders(res);
         
       } catch (err) {
         console.error('Error deleting order:', err);
