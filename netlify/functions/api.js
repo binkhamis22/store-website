@@ -67,8 +67,36 @@ exports.handler = async function(event, context) {
     console.log('API Request:', { path, httpMethod, body: parsedBody });
 
     // Extract the actual path from the full path
-    const actualPath = path.replace('/.netlify/functions/api', '');
+    let actualPath = path.replace('/.netlify/functions/api', '');
+    
+    // If the path is empty or just '/', it means we're accessing the API directly
+    if (!actualPath || actualPath === '/') {
+      actualPath = '/';
+    }
+    
     console.log('Actual path:', actualPath);
+
+    // Health check - when accessing API directly
+    if (actualPath === '/' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ 
+          message: 'API is working!',
+          availableEndpoints: [
+            'POST /api/auth/login',
+            'POST /api/auth/register', 
+            'GET /api/products',
+            'GET /api/orders',
+            'POST /api/orders'
+          ],
+          adminCredentials: {
+            email: 'admin@store.com',
+            password: 'admin123'
+          }
+        })
+      };
+    }
 
     // Auth routes
     if (actualPath === '/api/auth/login' && httpMethod === 'POST') {
@@ -163,20 +191,22 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Health check
-    if (actualPath === '/' && httpMethod === 'GET') {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ message: 'API is working!' })
-      };
-    }
-
     // Default response
     return {
       statusCode: 404,
       headers,
-      body: JSON.stringify({ message: 'Route not found', path: actualPath })
+      body: JSON.stringify({ 
+        message: 'Route not found', 
+        path: actualPath,
+        method: httpMethod,
+        availableEndpoints: [
+          'POST /api/auth/login',
+          'POST /api/auth/register', 
+          'GET /api/products',
+          'GET /api/orders',
+          'POST /api/orders'
+        ]
+      })
     };
 
   } catch (error) {
