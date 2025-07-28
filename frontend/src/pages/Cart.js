@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../api';
-import { getPriceDisplay } from '../utils/priceUtils';
+// Cart component
 
 function Cart() {
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const navigate = useNavigate();

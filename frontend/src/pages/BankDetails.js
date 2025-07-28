@@ -40,7 +40,7 @@ function BankDetails() {
     } else {
       setOrdersLoading(false);
     }
-  }, []); // Remove user dependency to prevent infinite re-renders
+  }, [user]); // Add user dependency
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -426,7 +426,6 @@ function BankDetails() {
           </div>
           <ul style={{ 
             margin: '0', 
-            paddingLeft: '1.5rem',
             color: '#856404',
             fontSize: '0.9rem',
             lineHeight: '1.6',
