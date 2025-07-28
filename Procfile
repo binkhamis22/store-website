@@ -1,1 +1,1 @@
-web: cd backend && node databaseServer.js 
+web: cd backend && npm install && npm rebuild sqlite3 && node databaseServer.js 
