@@ -87,9 +87,14 @@ exports.handler = async function(event, context) {
           'POST /api/auth/login',
           'POST /api/auth/register', 
           'GET /api/products',
+          'POST /api/products',
+          'PUT /api/products/{id}',
+          'DELETE /api/products/{id}',
           'GET /api/orders',
           'GET /api/orders/my?userId={userId}',
-          'POST /api/orders'
+          'POST /api/orders',
+          'PUT /api/orders/{id}',
+          'DELETE /api/orders/{id}'
         ],
           adminCredentials: {
             email: 'admin@store.com',
@@ -164,6 +169,79 @@ exports.handler = async function(event, context) {
       };
     }
 
+    // Create product
+    if (actualPath === '/api/products' && httpMethod === 'POST') {
+      const { name, description, price, image, stock, discount } = parsedBody;
+      const newProduct = {
+        id: products.length + 1,
+        name,
+        description,
+        price: parseFloat(price),
+        image,
+        stock: parseInt(stock),
+        discount: discount ? parseFloat(discount) : 0
+      };
+      
+      products.push(newProduct);
+      return {
+        statusCode: 201,
+        headers,
+        body: JSON.stringify(newProduct)
+      };
+    }
+
+    // Update product
+    if (actualPath.startsWith('/api/products/') && httpMethod === 'PUT') {
+      const productId = parseInt(actualPath.split('/').pop());
+      const { name, description, price, image, stock, discount } = parsedBody;
+      
+      const productIndex = products.findIndex(p => p.id === productId);
+      if (productIndex === -1) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ message: 'Product not found' })
+        };
+      }
+      
+      products[productIndex] = {
+        ...products[productIndex],
+        name,
+        description,
+        price: parseFloat(price),
+        image,
+        stock: parseInt(stock),
+        discount: discount ? parseFloat(discount) : 0
+      };
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(products[productIndex])
+      };
+    }
+
+    // Delete product
+    if (actualPath.startsWith('/api/products/') && httpMethod === 'DELETE') {
+      const productId = parseInt(actualPath.split('/').pop());
+      
+      const productIndex = products.findIndex(p => p.id === productId);
+      if (productIndex === -1) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ message: 'Product not found' })
+        };
+      }
+      
+      products.splice(productIndex, 1);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: 'Product deleted successfully' })
+      };
+    }
+
     // Orders routes
     if (actualPath === '/api/orders' && httpMethod === 'GET') {
       return {
@@ -210,6 +288,53 @@ exports.handler = async function(event, context) {
         statusCode: 201,
         headers,
         body: JSON.stringify(newOrder)
+      };
+    }
+
+    // Update order
+    if (actualPath.startsWith('/api/orders/') && httpMethod === 'PUT') {
+      const orderId = parseInt(actualPath.split('/').pop());
+      const { status } = parsedBody;
+      
+      const orderIndex = orders.findIndex(o => o.id === orderId);
+      if (orderIndex === -1) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ message: 'Order not found' })
+        };
+      }
+      
+      orders[orderIndex] = {
+        ...orders[orderIndex],
+        status
+      };
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(orders[orderIndex])
+      };
+    }
+
+    // Delete order
+    if (actualPath.startsWith('/api/orders/') && httpMethod === 'DELETE') {
+      const orderId = parseInt(actualPath.split('/').pop());
+      
+      const orderIndex = orders.findIndex(o => o.id === orderId);
+      if (orderIndex === -1) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ message: 'Order not found' })
+        };
+      }
+      
+      orders.splice(orderIndex, 1);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: 'Order deleted successfully' })
       };
     }
 
