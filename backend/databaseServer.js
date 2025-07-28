@@ -259,4 +259,7 @@ app.listen(PORT, () => {
   console.log(`✅ Database server running on port ${PORT}`);
   console.log(`🌐 API available at: http://localhost:${PORT}`);
   console.log('🗄️ Using SQLite database for persistent storage');
+}).on('error', (err) => {
+  console.error('❌ Server failed to start:', err.message);
+  process.exit(1);
 }); 
