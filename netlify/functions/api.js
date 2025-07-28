@@ -1,4 +1,79 @@
 // Simple API function for Netlify Functions
+const fs = require('fs');
+const path = require('path');
+
+// Data file path
+const dataFilePath = path.join(process.cwd(), 'netlify', 'functions', 'data.json');
+
+// Load data from file or use defaults
+function loadData() {
+  try {
+    if (fs.existsSync(dataFilePath)) {
+      const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+      return {
+        users: data.users || [],
+        products: data.products || [],
+        orders: data.orders || []
+      };
+    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+  }
+  
+  // Default data if file doesn't exist
+  return {
+    users: [
+      {
+        id: 1,
+        name: 'Admin User',
+        email: 'admin@store.com',
+        password: 'admin123',
+        isAdmin: true
+      }
+    ],
+    products: [
+      {
+        id: 1,
+        name: "Wireless Bluetooth Headphones",
+        description: "High-quality wireless headphones with noise cancellation.",
+        price: 89.99,
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+        stock: 25,
+        discount: 0
+      },
+      {
+        id: 2,
+        name: "Smartphone Case - Premium Leather",
+        description: "Handcrafted genuine leather case for phones.",
+        price: 24.99,
+        image: "https://images.unsplash.com/photo-1603313011108-4c4b0b0b0b0b?w=400",
+        stock: 50,
+        discount: 15
+      },
+      {
+        id: 3,
+        name: "Laptop Stand - Adjustable",
+        description: "Ergonomic aluminum laptop stand.",
+        price: 45.00,
+        image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400",
+        stock: 15,
+        discount: 0
+      }
+    ],
+    orders: []
+  };
+}
+
+// Save data to file
+function saveData(data) {
+  try {
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    console.log('Data saved successfully');
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+}
+
 exports.handler = async function(event, context) {
   // Enable CORS
   const headers = {
@@ -16,48 +91,8 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // In-memory storage
-  let users = [
-    {
-      id: 1,
-      name: 'Admin User',
-      email: 'admin@store.com',
-      password: 'admin123',
-      isAdmin: true
-    }
-  ];
-
-  let products = [
-    {
-      id: 1,
-      name: "Wireless Bluetooth Headphones",
-      description: "High-quality wireless headphones with noise cancellation.",
-      price: 89.99,
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-      stock: 25,
-      discount: 0
-    },
-    {
-      id: 2,
-      name: "Smartphone Case - Premium Leather",
-      description: "Handcrafted genuine leather case for phones.",
-      price: 24.99,
-      image: "https://images.unsplash.com/photo-1603313011108-4c4b0b0b0b0b?w=400",
-      stock: 50,
-      discount: 15
-    },
-    {
-      id: 3,
-      name: "Laptop Stand - Adjustable",
-      description: "Ergonomic aluminum laptop stand.",
-      price: 45.00,
-      image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400",
-      stock: 15,
-      discount: 0
-    }
-  ];
-
-  let orders = [];
+  // Load data
+  let { users, products, orders } = loadData();
 
   try {
     const { path, httpMethod, body } = event;
@@ -153,6 +188,7 @@ exports.handler = async function(event, context) {
       };
       
       users.push(newUser);
+      saveData({ users, products, orders }); // Save after user registration
       return {
         statusCode: 201,
         headers,
@@ -184,6 +220,7 @@ exports.handler = async function(event, context) {
       };
       
       products.push(newProduct);
+      saveData({ users, products, orders }); // Save after product creation
       return {
         statusCode: 201,
         headers,
@@ -216,6 +253,7 @@ exports.handler = async function(event, context) {
         discount: discount ? parseFloat(discount) : 0
       };
       
+      saveData({ users, products, orders }); // Save after product update
       return {
         statusCode: 200,
         headers,
@@ -238,6 +276,7 @@ exports.handler = async function(event, context) {
       }
       
       products.splice(productIndex, 1);
+      saveData({ users, products, orders }); // Save after product deletion
       return {
         statusCode: 200,
         headers,
@@ -287,6 +326,7 @@ exports.handler = async function(event, context) {
       };
       
       orders.push(newOrder);
+      saveData({ users, products, orders }); // Save after order creation
       return {
         statusCode: 201,
         headers,
@@ -313,6 +353,7 @@ exports.handler = async function(event, context) {
         status
       };
       
+      saveData({ users, products, orders }); // Save after order update
       return {
         statusCode: 200,
         headers,
@@ -334,6 +375,7 @@ exports.handler = async function(event, context) {
       }
       
       orders.splice(orderIndex, 1);
+      saveData({ users, products, orders }); // Save after order deletion
       return {
         statusCode: 200,
         headers,
