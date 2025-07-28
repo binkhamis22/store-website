@@ -66,8 +66,12 @@ exports.handler = async function(event, context) {
     // Debug logging
     console.log('API Request:', { path, httpMethod, body: parsedBody });
 
+    // Extract the actual path from the full path
+    const actualPath = path.replace('/.netlify/functions/api', '');
+    console.log('Actual path:', actualPath);
+
     // Auth routes
-    if ((path === '/api/auth/login' || path.endsWith('/api/auth/login')) && httpMethod === 'POST') {
+    if (actualPath === '/api/auth/login' && httpMethod === 'POST') {
       const { email, password } = parsedBody;
       const user = users.find(u => u.email === email && u.password === password);
       
@@ -94,7 +98,7 @@ exports.handler = async function(event, context) {
       }
     }
 
-    if ((path === '/api/auth/register' || path.endsWith('/api/auth/register')) && httpMethod === 'POST') {
+    if (actualPath === '/api/auth/register' && httpMethod === 'POST') {
       const { name, email, password, phone } = parsedBody;
       
       if (users.find(u => u.email === email)) {
@@ -123,7 +127,7 @@ exports.handler = async function(event, context) {
     }
 
     // Products routes
-    if ((path === '/api/products' || path.endsWith('/api/products')) && httpMethod === 'GET') {
+    if (actualPath === '/api/products' && httpMethod === 'GET') {
       return {
         statusCode: 200,
         headers,
@@ -132,7 +136,7 @@ exports.handler = async function(event, context) {
     }
 
     // Orders routes
-    if ((path === '/api/orders' || path.endsWith('/api/orders')) && httpMethod === 'GET') {
+    if (actualPath === '/api/orders' && httpMethod === 'GET') {
       return {
         statusCode: 200,
         headers,
@@ -140,7 +144,7 @@ exports.handler = async function(event, context) {
       };
     }
 
-    if ((path === '/api/orders' || path.endsWith('/api/orders')) && httpMethod === 'POST') {
+    if (actualPath === '/api/orders' && httpMethod === 'POST') {
       const { products: orderProducts, total, user: userId } = parsedBody;
       const newOrder = {
         id: orders.length + 1,
@@ -160,7 +164,7 @@ exports.handler = async function(event, context) {
     }
 
     // Health check
-    if (path === '/' && httpMethod === 'GET') {
+    if (actualPath === '/' && httpMethod === 'GET') {
       return {
         statusCode: 200,
         headers,
@@ -172,7 +176,7 @@ exports.handler = async function(event, context) {
     return {
       statusCode: 404,
       headers,
-      body: JSON.stringify({ message: 'Route not found' })
+      body: JSON.stringify({ message: 'Route not found', path: actualPath })
     };
 
   } catch (error) {
