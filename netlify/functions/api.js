@@ -62,9 +62,12 @@ exports.handler = async function(event, context) {
   try {
     const { path, httpMethod, body } = event;
     const parsedBody = body ? JSON.parse(body) : {};
+    
+    // Debug logging
+    console.log('API Request:', { path, httpMethod, body: parsedBody });
 
     // Auth routes
-    if (path === '/api/auth/login' && httpMethod === 'POST') {
+    if ((path === '/api/auth/login' || path.endsWith('/api/auth/login')) && httpMethod === 'POST') {
       const { email, password } = parsedBody;
       const user = users.find(u => u.email === email && u.password === password);
       
@@ -91,7 +94,7 @@ exports.handler = async function(event, context) {
       }
     }
 
-    if (path === '/api/auth/register' && httpMethod === 'POST') {
+    if ((path === '/api/auth/register' || path.endsWith('/api/auth/register')) && httpMethod === 'POST') {
       const { name, email, password, phone } = parsedBody;
       
       if (users.find(u => u.email === email)) {
@@ -120,7 +123,7 @@ exports.handler = async function(event, context) {
     }
 
     // Products routes
-    if (path === '/api/products' && httpMethod === 'GET') {
+    if ((path === '/api/products' || path.endsWith('/api/products')) && httpMethod === 'GET') {
       return {
         statusCode: 200,
         headers,
@@ -129,7 +132,7 @@ exports.handler = async function(event, context) {
     }
 
     // Orders routes
-    if (path === '/api/orders' && httpMethod === 'GET') {
+    if ((path === '/api/orders' || path.endsWith('/api/orders')) && httpMethod === 'GET') {
       return {
         statusCode: 200,
         headers,
@@ -137,7 +140,7 @@ exports.handler = async function(event, context) {
       };
     }
 
-    if (path === '/api/orders' && httpMethod === 'POST') {
+    if ((path === '/api/orders' || path.endsWith('/api/orders')) && httpMethod === 'POST') {
       const { products: orderProducts, total, user: userId } = parsedBody;
       const newOrder = {
         id: orders.length + 1,
